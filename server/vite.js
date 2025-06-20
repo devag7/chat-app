@@ -53,7 +53,7 @@ export async function setupVite(app, server) {
       // always reload the index.html file from disk in case it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
-        `src="/src/main.tsx"`,
+        `src="/src/main.jsx"`,
         `src="/src/main.jsx?v=${Date.now()}"`,
       );
       const page = await vite.transformIndexHtml(url, template);

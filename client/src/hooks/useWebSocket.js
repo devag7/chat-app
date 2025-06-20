@@ -80,13 +80,9 @@ export function useWebSocket(userId) {
 
     ws.current.onclose = () => {
       console.log("WebSocket disconnected");
-      // Try to reconnect after 3 seconds
-      setTimeout(() => {
-        if (userId) {
-          // Recreate connection
-          ws.current = new WebSocket(wsUrl);
-        }
-      }, 3000);
+      // Clear state on disconnect
+      setOnlineUsers(new Set());
+      setTypingUsers(new Map());
     };
 
     ws.current.onerror = (error) => {

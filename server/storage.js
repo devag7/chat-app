@@ -95,6 +95,7 @@ export class DatabaseStorage {
       const users = await User.find({}, '-password').lean();
       return users.map(user => ({
         ...user,
+        id: user._id.toString(),
         initials: this.getUserInitials(user.fullName)
       }));
     } catch (error) {
@@ -147,11 +148,13 @@ export class DatabaseStorage {
           // Add initials to members
           const membersWithInitials = room.members.map(member => ({
             ...member,
+            id: member._id.toString(),
             initials: this.getUserInitials(member.fullName)
           }));
 
           return {
             ...room,
+            id: room._id.toString(),
             members: membersWithInitials,
             lastMessage,
             unreadCount
@@ -171,10 +174,18 @@ export class DatabaseStorage {
       let existingRoom = await ChatRoom.findOne({
         isPrivate: true,
         members: { $all: [user1Id, user2Id], $size: 2 }
-      });
+      }).populate('members', '-password').lean();
 
       if (existingRoom) {
-        return existingRoom;
+        return {
+          ...existingRoom,
+          id: existingRoom._id.toString(),
+          members: existingRoom.members.map(member => ({
+            ...member,
+            id: member._id.toString(),
+            initials: this.getUserInitials(member.fullName)
+          }))
+        };
       }
 
       // Create new private room
@@ -186,7 +197,19 @@ export class DatabaseStorage {
       });
 
       const savedChatRoom = await chatRoom.save();
-      return savedChatRoom;
+      const populatedRoom = await ChatRoom.findById(savedChatRoom._id)
+        .populate('members', '-password')
+        .lean();
+
+      return {
+        ...populatedRoom,
+        id: populatedRoom._id.toString(),
+        members: populatedRoom.members.map(member => ({
+          ...member,
+          id: member._id.toString(),
+          initials: this.getUserInitials(member.fullName)
+        }))
+      };
     } catch (error) {
       throw error;
     }
@@ -204,7 +227,19 @@ export class DatabaseStorage {
       });
 
       const savedChatRoom = await chatRoom.save();
-      return savedChatRoom;
+      const populatedRoom = await ChatRoom.findById(savedChatRoom._id)
+        .populate('members', '-password')
+        .lean();
+
+      return {
+        ...populatedRoom,
+        id: populatedRoom._id.toString(),
+        members: populatedRoom.members.map(member => ({
+          ...member,
+          id: member._id.toString(),
+          initials: this.getUserInitials(member.fullName)
+        }))
+      };
     } catch (error) {
       throw error;
     }
@@ -294,8 +329,11 @@ export class DatabaseStorage {
 
       return {
         ...populatedMessage,
+        id: populatedMessage._id.toString(),
+        senderId: populatedMessage.sender._id.toString(),
         sender: {
           ...populatedMessage.sender,
+          id: populatedMessage.sender._id.toString(),
           initials: this.getUserInitials(populatedMessage.sender.fullName)
         }
       };
@@ -314,8 +352,11 @@ export class DatabaseStorage {
 
       return messages.reverse().map(message => ({
         ...message,
+        id: message._id.toString(),
+        senderId: message.sender._id.toString(),
         sender: {
           ...message.sender,
+          id: message.sender._id.toString(),
           initials: this.getUserInitials(message.sender.fullName)
         }
       }));

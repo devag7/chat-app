@@ -335,6 +335,10 @@ export default function ChatSidebar({
         onClose={() => setShowCreateGroup(false)}
         users={users}
         currentUserId={user?.id}
+        onGroupCreated={(newGroup) => {
+          // Refresh the chats list (this would be handled by the parent component)
+          setShowCreateGroup(false);
+        }}
       />
     </div>
   );

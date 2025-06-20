@@ -22,7 +22,7 @@ export default function ChatArea({
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
   const typingTimeoutRef = useRef();
-  const { sendTyping } = useWebSocket(currentUser?.id);
+  const { sendTyping, sendStoppedTyping } = useWebSocket(currentUser?.id);
 
   // Get all users for the chat details modal
   const { data: allUsers } = useQuery({
@@ -50,7 +50,7 @@ export default function ChatArea({
       onSendMessage(messageContent);
       setMessageContent("");
       setIsTyping(false);
-      sendTyping(chat.id, false);
+      sendStoppedTyping(chat.id);
       
       // Reset textarea height
       if (textareaRef.current) {
@@ -78,10 +78,10 @@ export default function ChatArea({
     // Handle typing indicator
     if (value.trim() && !isTyping) {
       setIsTyping(true);
-      sendTyping(chat.id, true);
+      sendTyping(chat.id);
     } else if (!value.trim() && isTyping) {
       setIsTyping(false);
-      sendTyping(chat.id, false);
+      sendStoppedTyping(chat.id);
     }
 
     // Clear existing timeout
@@ -93,15 +93,15 @@ export default function ChatArea({
     if (value.trim()) {
       typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false);
-        sendTyping(chat.id, false);
+        sendStoppedTyping(chat.id);
       }, 1000);
     }
   };
 
   // Get typing users for this chat
   const chatTypingUsers = Array.from(typingUsers.entries())
-    .filter(([userId, chatId]) => chatId === chat.id && userId !== currentUser?.id)
-    .map(([userId]) => userId);
+    .filter(([chatId, userId]) => chatId === chat.id && userId !== currentUser?.id)
+    .map(([chatId, userId]) => userId);
 
   const getGradientClass = (id) => {
     const gradients = [
