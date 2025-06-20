@@ -4,7 +4,7 @@ import { ChatRoomWithMembers, MessageWithSender, UserWithStatus } from "@shared/
 export function useChat(selectedChatId: number | null) {
   const { data: chats, isLoading: chatsLoading, refetch: refetchChats } = useQuery<ChatRoomWithMembers[]>({
     queryKey: ["/api/chats"],
-    refetchInterval: 2000, // Refetch every 2 seconds for real-time updates
+    refetchInterval: 3000, // Refetch every 3 seconds for real-time updates
   });
 
   const { data: users, isLoading: usersLoading } = useQuery<UserWithStatus[]>({

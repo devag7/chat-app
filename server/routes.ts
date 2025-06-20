@@ -211,6 +211,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/chats/group", requireAuth, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { name, memberIds } = req.body;
+      
+      if (!name || !Array.isArray(memberIds)) {
+        return res.status(400).json({ message: "Invalid group chat data" });
+      }
+      
+      const groupChat = await storage.createGroupChat(name, authReq.session.userId!, memberIds);
+      res.json(groupChat);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.get("/api/chats/:chatId/members", requireAuth, async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.chatId);
+      const members = await storage.getChatMembers(chatId);
+      res.json(members);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post("/api/chats/:chatId/members", requireAuth, async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.chatId);
+      const { userIds } = req.body;
+      
+      if (!Array.isArray(userIds)) {
+        return res.status(400).json({ message: "Invalid user IDs" });
+      }
+      
+      await storage.addMembersToRoom(chatId, userIds);
+      const members = await storage.getChatMembers(chatId);
+      res.json(members);
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.delete("/api/chats/:chatId/members/:userId", requireAuth, async (req, res) => {
+    try {
+      const chatId = parseInt(req.params.chatId);
+      const userId = parseInt(req.params.userId);
+      
+      await storage.removeMemberFromRoom(chatId, userId);
+      res.json({ message: "Member removed successfully" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server

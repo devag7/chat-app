@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Settings, LogOut } from "lucide-react";
+import { Search, Settings, LogOut, Plus, Users } from "lucide-react";
 import { ChatRoomWithMembers, UserWithStatus, User } from "@shared/schema";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import CreateGroupModal from "./CreateGroupModal";
 
 interface ChatSidebarProps {
   user: User | undefined;
@@ -30,6 +31,7 @@ export default function ChatSidebar({
   onlineUsers,
 }: ChatSidebarProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
   const { toast } = useToast();
 
   const logoutMutation = useMutation({
@@ -148,7 +150,7 @@ export default function ChatSidebar({
         </div>
         
         {/* Search */}
-        <div className="relative">
+        <div className="relative mb-3">
           <Input
             placeholder="Search conversations..."
             value={searchTerm}
@@ -157,6 +159,16 @@ export default function ChatSidebar({
           />
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
         </div>
+
+        {/* Create Group Button */}
+        <Button
+          onClick={() => setShowCreateGroup(true)}
+          className="w-full mb-3 chat-gradient hover:opacity-90"
+          size="sm"
+        >
+          <Users className="w-4 h-4 mr-2" />
+          Create Group
+        </Button>
       </div>
 
       {/* Chat List */}
@@ -185,15 +197,26 @@ export default function ChatSidebar({
                       <div className="relative">
                         <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} user-avatar`}>
                           <span className="text-sm">
-                            {otherUser ? otherUser.initials : chat.name.charAt(0).toUpperCase()}
+                            {chat.isPrivate ? 
+                              (otherUser ? otherUser.initials : "U") : 
+                              chat.name.charAt(0).toUpperCase()
+                            }
                           </span>
                         </div>
-                        <div className={isOnline ? "online-indicator" : "offline-indicator"} />
+                        {chat.isPrivate && <div className={isOnline ? "online-indicator" : "offline-indicator"} />}
+                        {!chat.isPrivate && (
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white dark:border-gray-900 rounded-full flex items-center justify-center">
+                            <Users className="w-2 h-2 text-white" />
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="font-medium text-gray-900 dark:text-white truncate">
-                            {otherUser ? otherUser.fullName : chat.name}
+                            {chat.isPrivate ? 
+                              (otherUser ? otherUser.fullName : "Unknown User") : 
+                              chat.name
+                            }
                           </h4>
                           {chat.lastMessage && (
                             <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -316,6 +339,14 @@ export default function ChatSidebar({
           )}
         </div>
       </ScrollArea>
+
+      {/* Create Group Modal */}
+      <CreateGroupModal
+        isOpen={showCreateGroup}
+        onClose={() => setShowCreateGroup(false)}
+        users={users}
+        currentUserId={user?.id}
+      />
     </div>
   );
 }

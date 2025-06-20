@@ -34,9 +34,13 @@ export interface IStorage {
   createChatRoom(chatRoom: InsertChatRoom, createdBy: number): Promise<ChatRoom>;
   getChatRoomsForUser(userId: number): Promise<ChatRoomWithMembers[]>;
   getOrCreatePrivateRoom(user1Id: number, user2Id: number): Promise<ChatRoom>;
+  createGroupChat(name: string, createdBy: number, memberIds: number[]): Promise<ChatRoom>;
   
   // Chat member operations
   addMemberToRoom(chatRoomId: number, userId: number): Promise<ChatMember>;
+  addMembersToRoom(chatRoomId: number, userIds: number[]): Promise<ChatMember[]>;
+  removeMemberFromRoom(chatRoomId: number, userId: number): Promise<void>;
+  getChatMembers(chatRoomId: number): Promise<UserWithStatus[]>;
   
   // Message operations
   createMessage(message: InsertMessage, senderId: number): Promise<MessageWithSender>;
@@ -226,6 +230,27 @@ export class DatabaseStorage implements IStorage {
     return chatRoom;
   }
 
+  async createGroupChat(name: string, createdBy: number, memberIds: number[]): Promise<ChatRoom> {
+    const [chatRoom] = await db
+      .insert(chatRooms)
+      .values({
+        name,
+        isPrivate: false,
+        createdBy,
+      })
+      .returning();
+    
+    // Add creator as member
+    await this.addMemberToRoom(chatRoom.id, createdBy);
+    
+    // Add all other members
+    if (memberIds.length > 0) {
+      await this.addMembersToRoom(chatRoom.id, memberIds);
+    }
+    
+    return chatRoom;
+  }
+
   async addMemberToRoom(chatRoomId: number, userId: number): Promise<ChatMember> {
     const [chatMember] = await db
       .insert(chatMembers)
@@ -235,6 +260,42 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return chatMember;
+  }
+
+  async addMembersToRoom(chatRoomId: number, userIds: number[]): Promise<ChatMember[]> {
+    const values = userIds.map(userId => ({
+      chatRoomId,
+      userId,
+    }));
+    
+    const chatMembers = await db
+      .insert(chatMembers)
+      .values(values)
+      .returning();
+    return chatMembers;
+  }
+
+  async removeMemberFromRoom(chatRoomId: number, userId: number): Promise<void> {
+    await db
+      .delete(chatMembers)
+      .where(
+        and(
+          eq(chatMembers.chatRoomId, chatRoomId),
+          eq(chatMembers.userId, userId)
+        )
+      );
+  }
+
+  async getChatMembers(chatRoomId: number): Promise<UserWithStatus[]> {
+    const roomMembers = await db
+      .select({
+        user: users,
+      })
+      .from(chatMembers)
+      .innerJoin(users, eq(chatMembers.userId, users.id))
+      .where(eq(chatMembers.chatRoomId, chatRoomId));
+
+    return roomMembers.map(({ user }) => this.toUserWithStatus(user));
   }
 
   async createMessage(insertMessage: InsertMessage, senderId: number): Promise<MessageWithSender> {

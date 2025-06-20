@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Phone, Video, Info, Paperclip, Smile, Send } from "lucide-react";
-import { ChatRoomWithMembers, MessageWithSender, User } from "@shared/schema";
+import { Phone, Video, Info, Paperclip, Smile, Send, Users } from "lucide-react";
+import { ChatRoomWithMembers, MessageWithSender, User, UserWithStatus } from "@shared/schema";
 import MessageBubble from "./MessageBubble";
+import ChatDetails from "./ChatDetails";
 import { useWebSocket } from "@/hooks/useWebSocket";
+import { useQuery } from "@tanstack/react-query";
 
 interface ChatAreaProps {
   chat: ChatRoomWithMembers;
@@ -26,10 +28,16 @@ export default function ChatArea({
 }: ChatAreaProps) {
   const [messageContent, setMessageContent] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showChatDetails, setShowChatDetails] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { sendTyping } = useWebSocket(currentUser?.id);
+
+  // Get all users for the chat details modal
+  const { data: allUsers } = useQuery<UserWithStatus[]>({
+    queryKey: ["/api/users"],
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -135,11 +143,21 @@ export default function ChatArea({
             </div>
             <div>
               <h3 className="font-medium text-gray-900 dark:text-white">
-                {otherUser ? otherUser.fullName : chat.name}
+                {chat.isPrivate ? 
+                  (otherUser ? otherUser.fullName : "Unknown User") : 
+                  chat.name
+                }
               </h3>
-              <p className={`text-sm ${isOtherUserOnline ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}`}>
-                {isOtherUserOnline ? "Online" : "Offline"}
-              </p>
+              {chat.isPrivate ? (
+                <p className={`text-sm ${isOtherUserOnline ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}`}>
+                  {isOtherUserOnline ? "Online" : "Offline"}
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                  <Users className="w-3 h-3 mr-1" />
+                  {chat.members.length} member{chat.members.length !== 1 ? 's' : ''}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -149,7 +167,11 @@ export default function ChatArea({
             <Button variant="ghost" size="sm">
               <Phone className="w-5 h-5" />
             </Button>
-            <Button variant="ghost" size="sm">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowChatDetails(true)}
+            >
               <Info className="w-5 h-5" />
             </Button>
           </div>
@@ -219,6 +241,17 @@ export default function ChatArea({
           </Button>
         </div>
       </div>
+
+      {/* Chat Details Modal */}
+      {showChatDetails && allUsers && (
+        <ChatDetails
+          isOpen={showChatDetails}
+          onClose={() => setShowChatDetails(false)}
+          chat={chat}
+          currentUserId={currentUser?.id}
+          allUsers={allUsers}
+        />
+      )}
     </div>
   );
 }
