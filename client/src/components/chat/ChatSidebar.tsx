@@ -163,7 +163,7 @@ export default function ChatSidebar({
       <ScrollArea className="flex-1">
         <div className="p-2">
           {/* Existing Chats */}
-          {filteredChats.length > 0 && (
+          {filteredChats && filteredChats.length > 0 && (
             <div>
               <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide">
                 Conversations
@@ -234,12 +234,13 @@ export default function ChatSidebar({
           )}
 
           {/* All Users */}
-          {searchTerm && (
+          {searchTerm && users && (
             <div className="mt-4">
               <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide">
                 All Users
               </h4>
               {users.filter(u => 
+                u && u.fullName && 
                 u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) &&
                 u.id !== user?.id // Exclude current user
               ).map((availableUser) => {
@@ -278,7 +279,7 @@ export default function ChatSidebar({
           )}
 
           {/* Available Users (only show when not searching) */}
-          {!searchTerm && filteredUsers.length > 0 && (
+          {!searchTerm && filteredUsers && filteredUsers.length > 0 && (
             <div className="mt-4">
               <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide">
                 Start New Chat

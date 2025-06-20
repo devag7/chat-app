@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function ChatPage() {
   const { user } = useAuth();
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
-  const { chats, users, messages, isLoading } = useChat(selectedChatId);
+  const { chats, users, messages, isLoading, refetchChats } = useChat(selectedChatId);
   const { sendMessage, onlineUsers, typingUsers } = useWebSocket(user?.id);
 
   const selectedChat = chats?.find(chat => chat.id === selectedChatId);
@@ -46,8 +46,8 @@ export default function ChatPage() {
       if (response.ok) {
         const chatRoom = await response.json();
         setSelectedChatId(chatRoom.id);
-        // Refresh chats list
-        window.location.reload();
+        // Refresh chats to show the new chat
+        refetchChats();
       }
     } catch (error) {
       console.error("Error starting chat:", error);
@@ -66,8 +66,8 @@ export default function ChatPage() {
     <div className="h-screen flex bg-white dark:bg-gray-900">
       <ChatSidebar
         user={user}
-        chats={chats || []}
-        users={users || []}
+        chats={chats}
+        users={users}
         selectedChatId={selectedChatId}
         onSelectChat={handleSelectChat}
         onStartChat={handleStartChat}
@@ -78,7 +78,7 @@ export default function ChatPage() {
         {selectedChat ? (
           <ChatArea
             chat={selectedChat}
-            messages={messages || []}
+            messages={messages}
             currentUser={user}
             onSendMessage={handleSendMessage}
             typingUsers={typingUsers}

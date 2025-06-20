@@ -159,7 +159,7 @@ export default function ChatArea({
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {messages.map((message) => (
+          {messages.filter(message => message && message.sender).map((message) => (
             <MessageBubble
               key={message.id}
               message={message}

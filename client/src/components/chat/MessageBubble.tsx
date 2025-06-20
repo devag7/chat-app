@@ -8,6 +8,11 @@ interface MessageBubbleProps {
 }
 
 export default function MessageBubble({ message, isOwn, showAvatar = true }: MessageBubbleProps) {
+  // Guard against undefined message or sender
+  if (!message || !message.sender) {
+    return null;
+  }
+
   const getGradientClass = (id: number) => {
     const gradients = [
       "from-blue-500 to-purple-500",
