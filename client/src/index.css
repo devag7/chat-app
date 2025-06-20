@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(240, 10%, 3.9%);
+  --muted: hsl(240, 4.8%, 95.9%);
+  --muted-foreground: hsl(240, 3.7%, 45.9%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(240, 10%, 3.9%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(240, 10%, 3.9%);
+  --border: hsl(240, 5.9%, 90%);
+  --input: hsl(240, 5.9%, 90%);
+  --primary: hsl(247, 81%, 66%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(283, 39%, 53%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 4.8%, 95.9%);
+  --accent-foreground: hsl(240, 5.9%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 10%, 3.9%);
+  --radius: 0.5rem;
+  
+  /* Chat specific colors */
+  --chat-primary: hsl(247, 81%, 66%);
+  --chat-secondary: hsl(283, 39%, 53%);
+  --chat-dark: hsl(220, 13%, 18%);
+  --chat-dark-lighter: hsl(220, 13%, 25%);
+  --chat-dark-light: hsl(220, 9%, 46%);
+}
+
+.dark {
+  --background: hsl(220, 13%, 18%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(220, 13%, 25%);
+  --muted-foreground: hsl(220, 9%, 46%);
+  --popover: hsl(220, 13%, 18%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(220, 13%, 18%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(220, 13%, 25%);
+  --input: hsl(220, 13%, 25%);
+  --primary: hsl(247, 81%, 66%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(220, 13%, 25%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(220, 13%, 25%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .chat-gradient {
+    background: linear-gradient(135deg, var(--chat-primary), var(--chat-secondary));
+  }
+  
+  .chat-message-received {
+    @apply bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-sm;
+  }
+  
+  .chat-message-sent {
+    @apply chat-gradient text-white rounded-2xl rounded-tr-sm;
+  }
+  
+  .chat-input {
+    @apply bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+  
+  .chat-sidebar {
+    @apply bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700;
+  }
+  
+  .chat-item-active {
+    @apply bg-primary bg-opacity-10 border-l-4 border-primary;
+  }
+  
+  .user-avatar {
+    @apply rounded-full flex items-center justify-center text-white font-medium;
+  }
+  
+  .online-indicator {
+    @apply absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full;
+  }
+  
+  .offline-indicator {
+    @apply absolute -bottom-1 -right-1 w-3 h-3 bg-gray-400 border-2 border-white dark:border-gray-900 rounded-full;
+  }
+}
+
+@layer utilities {
+  .animate-typing {
+    animation: typing 1.4s infinite ease-in-out;
+  }
+  
+  .animate-typing-delay-1 {
+    animation: typing 1.4s infinite ease-in-out 0.2s;
+  }
+  
+  .animate-typing-delay-2 {
+    animation: typing 1.4s infinite ease-in-out 0.4s;
+  }
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
