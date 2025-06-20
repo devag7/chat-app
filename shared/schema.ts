@@ -1,6 +1,18 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, varchar, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
+
+// Session storage table for authentication
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -36,6 +48,44 @@ export const messages = pgTable("messages", {
   createdAt: timestamp("created_at").defaultNow(),
   isRead: boolean("is_read").default(false),
 });
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  createdChatRooms: many(chatRooms),
+  chatMembers: many(chatMembers),
+  messages: many(messages),
+}));
+
+export const chatRoomsRelations = relations(chatRooms, ({ one, many }) => ({
+  creator: one(users, {
+    fields: [chatRooms.createdBy],
+    references: [users.id],
+  }),
+  members: many(chatMembers),
+  messages: many(messages),
+}));
+
+export const chatMembersRelations = relations(chatMembers, ({ one }) => ({
+  chatRoom: one(chatRooms, {
+    fields: [chatMembers.chatRoomId],
+    references: [chatRooms.id],
+  }),
+  user: one(users, {
+    fields: [chatMembers.userId],
+    references: [users.id],
+  }),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  chatRoom: one(chatRooms, {
+    fields: [messages.chatRoomId],
+    references: [chatRooms.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+  }),
+}));
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).pick({

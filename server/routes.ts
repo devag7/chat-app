@@ -5,9 +5,7 @@ import { storage } from "./storage";
 import { insertUserSchema, loginUserSchema, insertMessageSchema } from "@shared/schema";
 import bcrypt from "bcrypt";
 import session from "express-session";
-import MemoryStore from "memorystore";
-
-const MemStore = MemoryStore(session);
+import connectPg from "connect-pg-simple";
 
 interface AuthenticatedRequest extends Express.Request {
   session: session.Session & session.SessionData & {
@@ -20,18 +18,24 @@ interface WebSocketClient extends WebSocket {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Session middleware
+  // Session middleware with PostgreSQL store
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true,
+    ttl: 7 * 24 * 60 * 60, // 1 week in seconds
+    tableName: "sessions",
+  });
+
   app.use(session({
     secret: process.env.SESSION_SECRET || "your-secret-key",
-    store: new MemStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
-    }),
+    store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
       secure: false, // Set to true in production with HTTPS
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     }
   }));
 

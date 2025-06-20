@@ -16,6 +16,8 @@ import {
   type MessageWithSender,
   type ChatConversation,
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc, asc } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
 export interface IStorage {
@@ -42,27 +44,7 @@ export interface IStorage {
   markMessagesAsRead(chatRoomId: number, userId: number): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private chatRooms: Map<number, ChatRoom>;
-  private chatMembers: Map<number, ChatMember>;
-  private messages: Map<number, Message>;
-  private currentUserId: number;
-  private currentChatRoomId: number;
-  private currentChatMemberId: number;
-  private currentMessageId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.chatRooms = new Map();
-    this.chatMembers = new Map();
-    this.messages = new Map();
-    this.currentUserId = 1;
-    this.currentChatRoomId = 1;
-    this.currentChatMemberId = 1;
-    this.currentMessageId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   private getUserInitials(fullName: string): string {
     return fullName
       .split(" ")
@@ -80,182 +62,200 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const hashedPassword = await bcrypt.hash(insertUser.password, 10);
-    const id = this.currentUserId++;
-    const user: User = {
-      ...insertUser,
-      id,
-      password: hashedPassword,
-      isOnline: false,
-      lastSeen: new Date(),
-      createdAt: new Date(),
-    };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        password: hashedPassword,
+      })
+      .returning();
     return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
   }
 
   async getUserById(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async updateUser(userId: number, updates: Partial<Pick<User, 'fullName' | 'username' | 'email'>>): Promise<User> {
-    const user = this.users.get(userId);
+    const [user] = await db
+      .update(users)
+      .set(updates)
+      .where(eq(users.id, userId))
+      .returning();
     if (!user) {
       throw new Error("User not found");
     }
-    
-    const updatedUser = { ...user, ...updates };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
+    return user;
   }
 
   async updateUserPassword(userId: number, newPassword: string): Promise<void> {
-    const user = this.users.get(userId);
-    if (!user) {
-      throw new Error("User not found");
-    }
-    
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-    this.users.set(userId, user);
+    await db
+      .update(users)
+      .set({ password: hashedPassword })
+      .where(eq(users.id, userId));
   }
 
   async updateUserOnlineStatus(userId: number, isOnline: boolean): Promise<void> {
-    const user = this.users.get(userId);
-    if (user) {
-      user.isOnline = isOnline;
-      user.lastSeen = new Date();
-      this.users.set(userId, user);
-    }
+    await db
+      .update(users)
+      .set({ 
+        isOnline,
+        lastSeen: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 
   async getAllUsers(): Promise<UserWithStatus[]> {
-    return Array.from(this.users.values()).map(user => this.toUserWithStatus(user));
+    const allUsers = await db.select().from(users);
+    return allUsers.map(user => this.toUserWithStatus(user));
   }
 
   async createChatRoom(insertChatRoom: InsertChatRoom, createdBy: number): Promise<ChatRoom> {
-    const id = this.currentChatRoomId++;
-    const chatRoom: ChatRoom = {
-      id,
-      name: insertChatRoom.name,
-      isPrivate: insertChatRoom.isPrivate ?? true,
-      createdBy,
-      createdAt: new Date(),
-    };
-    this.chatRooms.set(id, chatRoom);
+    const [chatRoom] = await db
+      .insert(chatRooms)
+      .values({
+        ...insertChatRoom,
+        createdBy,
+      })
+      .returning();
     
     // Add creator as member
-    await this.addMemberToRoom(id, createdBy);
+    await this.addMemberToRoom(chatRoom.id, createdBy);
     
     return chatRoom;
   }
 
   async getChatRoomsForUser(userId: number): Promise<ChatRoomWithMembers[]> {
-    const userMemberships = Array.from(this.chatMembers.values())
-      .filter(member => member.userId === userId);
-    
+    // Get user's chat room memberships with room details
+    const userChatRooms = await db
+      .select({
+        chatRoom: chatRooms,
+      })
+      .from(chatMembers)
+      .innerJoin(chatRooms, eq(chatMembers.chatRoomId, chatRooms.id))
+      .where(eq(chatMembers.userId, userId));
+
     const chatRoomsWithMembers: ChatRoomWithMembers[] = [];
-    
-    for (const membership of userMemberships) {
-      const chatRoom = this.chatRooms.get(membership.chatRoomId!);
-      if (chatRoom) {
-        const allMembers = Array.from(this.chatMembers.values())
-          .filter(member => member.chatRoomId === chatRoom.id);
-        
-        const members: UserWithStatus[] = [];
-        for (const member of allMembers) {
-          const user = this.users.get(member.userId!);
-          if (user) {
-            members.push(this.toUserWithStatus(user));
-          }
-        }
 
-        // Get last message
-        const roomMessages = Array.from(this.messages.values())
-          .filter(msg => msg.chatRoomId === chatRoom.id)
-          .sort((a, b) => new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime());
-        
-        const lastMessage = roomMessages[0];
-        
-        // Count unread messages
-        const unreadCount = roomMessages.filter(msg => 
-          msg.senderId !== userId && !msg.isRead
-        ).length;
+    for (const { chatRoom } of userChatRooms) {
+      // Get all members for this chat room
+      const roomMembers = await db
+        .select({
+          user: users,
+        })
+        .from(chatMembers)
+        .innerJoin(users, eq(chatMembers.userId, users.id))
+        .where(eq(chatMembers.chatRoomId, chatRoom.id));
 
-        chatRoomsWithMembers.push({
-          ...chatRoom,
-          members,
-          lastMessage,
-          unreadCount,
-        });
-      }
+      const members = roomMembers.map(({ user }) => this.toUserWithStatus(user));
+
+      // Get last message
+      const [lastMessage] = await db
+        .select()
+        .from(messages)
+        .where(eq(messages.chatRoomId, chatRoom.id))
+        .orderBy(desc(messages.createdAt))
+        .limit(1);
+
+      // Count unread messages
+      const unreadMessages = await db
+        .select()
+        .from(messages)
+        .where(
+          and(
+            eq(messages.chatRoomId, chatRoom.id),
+            eq(messages.isRead, false)
+          )
+        );
+
+      const unreadCount = unreadMessages.filter(msg => msg.senderId !== userId).length;
+
+      chatRoomsWithMembers.push({
+        ...chatRoom,
+        members,
+        lastMessage,
+        unreadCount,
+      });
     }
-    
+
     return chatRoomsWithMembers;
   }
 
   async getOrCreatePrivateRoom(user1Id: number, user2Id: number): Promise<ChatRoom> {
-    // Check if private room already exists between these users
-    const user1Memberships = Array.from(this.chatMembers.values())
-      .filter(member => member.userId === user1Id);
-    
-    for (const membership of user1Memberships) {
-      const chatRoom = this.chatRooms.get(membership.chatRoomId!);
-      if (chatRoom && chatRoom.isPrivate) {
-        const roomMembers = Array.from(this.chatMembers.values())
-          .filter(member => member.chatRoomId === chatRoom.id);
-        
-        if (roomMembers.length === 2 && 
-            roomMembers.some(member => member.userId === user2Id)) {
-          return chatRoom;
-        }
+    // Get all private rooms where user1 is a member
+    const user1Rooms = await db
+      .select({
+        chatRoom: chatRooms,
+      })
+      .from(chatMembers)
+      .innerJoin(chatRooms, eq(chatMembers.chatRoomId, chatRooms.id))
+      .where(
+        and(
+          eq(chatMembers.userId, user1Id),
+          eq(chatRooms.isPrivate, true)
+        )
+      );
+
+    // Check if any of these rooms also has user2 as a member
+    for (const { chatRoom } of user1Rooms) {
+      const roomMembers = await db
+        .select()
+        .from(chatMembers)
+        .where(eq(chatMembers.chatRoomId, chatRoom.id));
+
+      if (roomMembers.length === 2 && 
+          roomMembers.some(member => member.userId === user2Id)) {
+        return chatRoom;
       }
     }
-    
+
     // Create new private room
-    const user2 = this.users.get(user2Id);
     const chatRoom = await this.createChatRoom({
-      name: `Private chat`,
+      name: "Private chat",
       isPrivate: true,
     }, user1Id);
-    
+
     await this.addMemberToRoom(chatRoom.id, user2Id);
-    
+
     return chatRoom;
   }
 
   async addMemberToRoom(chatRoomId: number, userId: number): Promise<ChatMember> {
-    const id = this.currentChatMemberId++;
-    const chatMember: ChatMember = {
-      id,
-      chatRoomId,
-      userId,
-      joinedAt: new Date(),
-    };
-    this.chatMembers.set(id, chatMember);
+    const [chatMember] = await db
+      .insert(chatMembers)
+      .values({
+        chatRoomId,
+        userId,
+      })
+      .returning();
     return chatMember;
   }
 
   async createMessage(insertMessage: InsertMessage, senderId: number): Promise<MessageWithSender> {
-    const id = this.currentMessageId++;
-    const message: Message = {
-      id,
-      chatRoomId: insertMessage.chatRoomId!,
-      senderId,
-      content: insertMessage.content,
-      createdAt: new Date(),
-      isRead: false,
-    };
-    this.messages.set(id, message);
-    
-    const sender = this.users.get(senderId);
+    const [message] = await db
+      .insert(messages)
+      .values({
+        ...insertMessage,
+        senderId,
+      })
+      .returning();
+
+    const [sender] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, senderId));
+
     if (!sender) {
       throw new Error("Sender not found");
     }
-    
+
     return {
       ...message,
       sender: this.toUserWithStatus(sender),
@@ -263,33 +263,33 @@ export class MemStorage implements IStorage {
   }
 
   async getMessagesForRoom(chatRoomId: number): Promise<MessageWithSender[]> {
-    const roomMessages = Array.from(this.messages.values())
-      .filter(msg => msg.chatRoomId === chatRoomId)
-      .sort((a, b) => new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime());
-    
-    const messagesWithSender: MessageWithSender[] = [];
-    
-    for (const message of roomMessages) {
-      const sender = this.users.get(message.senderId!);
-      if (sender) {
-        messagesWithSender.push({
-          ...message,
-          sender: this.toUserWithStatus(sender),
-        });
-      }
-    }
-    
-    return messagesWithSender;
+    const roomMessages = await db
+      .select({
+        message: messages,
+        sender: users,
+      })
+      .from(messages)
+      .innerJoin(users, eq(messages.senderId, users.id))
+      .where(eq(messages.chatRoomId, chatRoomId))
+      .orderBy(asc(messages.createdAt));
+
+    return roomMessages.map(({ message, sender }) => ({
+      ...message,
+      sender: this.toUserWithStatus(sender),
+    }));
   }
 
   async markMessagesAsRead(chatRoomId: number, userId: number): Promise<void> {
-    Array.from(this.messages.values())
-      .filter(msg => msg.chatRoomId === chatRoomId && msg.senderId !== userId)
-      .forEach(msg => {
-        msg.isRead = true;
-        this.messages.set(msg.id, msg);
-      });
+    await db
+      .update(messages)
+      .set({ isRead: true })
+      .where(
+        and(
+          eq(messages.chatRoomId, chatRoomId),
+          eq(messages.isRead, false)
+        )
+      );
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
