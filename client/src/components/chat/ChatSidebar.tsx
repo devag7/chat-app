@@ -104,6 +104,7 @@ export default function ChatSidebar({
 
   const filteredUsers = users.filter(u => 
     u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    u.id !== user?.id && // Exclude current user
     !chats.some(chat => {
       const otherUser = getOtherUser(chat);
       return otherUser?.id === u.id;
@@ -232,8 +233,52 @@ export default function ChatSidebar({
             </div>
           )}
 
-          {/* Available Users */}
-          {filteredUsers.length > 0 && (
+          {/* All Users */}
+          {searchTerm && (
+            <div className="mt-4">
+              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide">
+                All Users
+              </h4>
+              {users.filter(u => 
+                u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                u.id !== user?.id // Exclude current user
+              ).map((availableUser) => {
+                const isOnline = onlineUsers.has(availableUser.id);
+                const hasExistingChat = chats.some(chat => {
+                  const otherUser = getOtherUser(chat);
+                  return otherUser?.id === availableUser.id;
+                });
+                
+                return (
+                  <div
+                    key={availableUser.id}
+                    onClick={() => onStartChat(availableUser.id)}
+                    className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer rounded-lg mb-1 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(availableUser.id)} user-avatar`}>
+                          <span className="text-sm">{availableUser.initials}</span>
+                        </div>
+                        <div className={isOnline ? "online-indicator" : "offline-indicator"} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          {availableUser.fullName}
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          @{availableUser.username} {hasExistingChat && "• Chat exists"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Available Users (only show when not searching) */}
+          {!searchTerm && filteredUsers.length > 0 && (
             <div className="mt-4">
               <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide">
                 Start New Chat

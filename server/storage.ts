@@ -189,34 +189,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrCreatePrivateRoom(user1Id: number, user2Id: number): Promise<ChatRoom> {
-    // Get all private rooms where user1 is a member
-    const user1Rooms = await db
-      .select({
-        chatRoom: chatRooms,
-      })
-      .from(chatMembers)
-      .innerJoin(chatRooms, eq(chatMembers.chatRoomId, chatRooms.id))
+    // First, try to find existing room with both users using a more efficient query
+    const existingRoom = await db
+      .select({ chatRoom: chatRooms })
+      .from(chatRooms)
+      .innerJoin(chatMembers, eq(chatRooms.id, chatMembers.chatRoomId))
       .where(
         and(
-          eq(chatMembers.userId, user1Id),
-          eq(chatRooms.isPrivate, true)
+          eq(chatRooms.isPrivate, true),
+          eq(chatMembers.userId, user1Id)
         )
       );
 
-    // Check if any of these rooms also has user2 as a member
-    for (const { chatRoom } of user1Rooms) {
+    // Check each room to see if user2 is also a member
+    for (const { chatRoom } of existingRoom) {
       const roomMembers = await db
         .select()
         .from(chatMembers)
         .where(eq(chatMembers.chatRoomId, chatRoom.id));
 
+      // Check if this is exactly a 2-person room with both users
       if (roomMembers.length === 2 && 
           roomMembers.some(member => member.userId === user2Id)) {
         return chatRoom;
       }
     }
 
-    // Create new private room
+    // No existing room found, create new one
     const chatRoom = await this.createChatRoom({
       name: "Private chat",
       isPrivate: true,

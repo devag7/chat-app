@@ -25,6 +25,20 @@ export default function ChatPage() {
 
   const handleStartChat = async (userId: number) => {
     try {
+      // First check if a chat already exists
+      const existingChat = chats?.find(chat => {
+        if (!chat.isPrivate) return false;
+        const otherUser = chat.members.find(member => member.id !== user?.id);
+        return otherUser?.id === userId;
+      });
+
+      if (existingChat) {
+        // If chat exists, just select it
+        setSelectedChatId(existingChat.id);
+        return;
+      }
+
+      // Create new chat if it doesn't exist
       const response = await fetch(`/api/chats/${userId}`, {
         method: "POST",
         credentials: "include",
@@ -32,6 +46,8 @@ export default function ChatPage() {
       if (response.ok) {
         const chatRoom = await response.json();
         setSelectedChatId(chatRoom.id);
+        // Refresh chats list
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error starting chat:", error);
