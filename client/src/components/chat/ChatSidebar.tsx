@@ -38,10 +38,8 @@ export default function ChatSidebar({
     },
     onSuccess: () => {
       queryClient.clear();
-      toast({
-        title: "Logged out",
-        description: "You have been logged out successfully",
-      });
+      // Force immediate redirect by reloading the page
+      window.location.reload();
     },
     onError: (error: Error) => {
       toast({

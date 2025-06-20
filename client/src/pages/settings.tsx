@@ -12,6 +12,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { ArrowLeft, User, Bell, Shield, Palette } from "lucide-react";
 import { Link } from "wouter";
 import { queryClient } from "@/lib/queryClient";
@@ -37,8 +38,8 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 export default function SettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const profileForm = useForm<ProfileForm>({
@@ -360,8 +361,8 @@ export default function SettingsPage() {
                   </div>
                   <Switch
                     id="darkmode"
-                    checked={darkMode}
-                    onCheckedChange={setDarkMode}
+                    checked={isDark}
+                    onCheckedChange={toggleTheme}
                   />
                 </div>
               </CardContent>

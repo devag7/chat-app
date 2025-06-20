@@ -7,13 +7,14 @@ import ChatPage from "@/pages/chat";
 import AuthPage from "@/pages/auth";
 import SettingsPage from "@/pages/settings";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 
 function Router() {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
@@ -29,12 +30,15 @@ function Router() {
       ) : (
         <Route path="/" component={AuthPage} />
       )}
-      <Route component={() => <div>404 - Page Not Found</div>} />
+      <Route component={() => <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 text-gray-900 dark:text-white">404 - Page Not Found</div>} />
     </Switch>
   );
 }
 
 function App() {
+  // Initialize theme on app start
+  useTheme();
+  
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
