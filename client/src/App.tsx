@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ChatPage from "@/pages/chat";
 import AuthPage from "@/pages/auth";
+import SettingsPage from "@/pages/settings";
 import { useAuth } from "@/hooks/useAuth";
 
 function Router() {
@@ -21,7 +22,10 @@ function Router() {
   return (
     <Switch>
       {user ? (
-        <Route path="/" component={ChatPage} />
+        <>
+          <Route path="/" component={ChatPage} />
+          <Route path="/settings" component={SettingsPage} />
+        </>
       ) : (
         <Route path="/" component={AuthPage} />
       )}

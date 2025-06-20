@@ -23,6 +23,8 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: number): Promise<User | undefined>;
+  updateUser(userId: number, updates: Partial<Pick<User, 'fullName' | 'username' | 'email'>>): Promise<User>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
   updateUserOnlineStatus(userId: number, isOnline: boolean): Promise<void>;
   getAllUsers(): Promise<UserWithStatus[]>;
   
@@ -97,6 +99,28 @@ export class MemStorage implements IStorage {
 
   async getUserById(id: number): Promise<User | undefined> {
     return this.users.get(id);
+  }
+
+  async updateUser(userId: number, updates: Partial<Pick<User, 'fullName' | 'username' | 'email'>>): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    const updatedUser = { ...user, ...updates };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    this.users.set(userId, user);
   }
 
   async updateUserOnlineStatus(userId: number, isOnline: boolean): Promise<void> {

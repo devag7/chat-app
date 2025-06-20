@@ -120,6 +120,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/auth/profile", requireAuth, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { fullName, username, email } = req.body;
+      const userId = authReq.session.userId!;
+      
+      // Check if username/email is already taken by another user
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { fullName, username, email });
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
+  app.put("/api/auth/password", requireAuth, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { currentPassword, newPassword } = req.body;
+      const userId = authReq.session.userId!;
+      
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      await storage.updateUserPassword(userId, newPassword);
+      res.json({ message: "Password updated successfully" });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
+  });
+
   // Chat routes
   app.get("/api/users", requireAuth, async (req: AuthenticatedRequest, res) => {
     try {
