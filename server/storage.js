@@ -34,6 +34,12 @@ export class DatabaseStorage {
   async getUserByEmail(email) {
     try {
       const user = await User.findOne({ email }).lean();
+      if (user) {
+        return {
+          ...user,
+          id: user._id.toString()
+        };
+      }
       return user;
     } catch (error) {
       throw error;

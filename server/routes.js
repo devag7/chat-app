@@ -63,6 +63,7 @@ export async function registerRoutes(app) {
       // Convert to plain object and remove password
       const userObj = user.toObject();
       const { password, ...userWithoutPassword } = userObj;
+      userWithoutPassword.id = userWithoutPassword._id.toString();
       res.json(userWithoutPassword);
     } catch (error) {
       console.error('Registration error:', error);
