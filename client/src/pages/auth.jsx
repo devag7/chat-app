@@ -11,7 +11,7 @@ import { apiRequest } from "../lib/queryClient.js";
 import { useToast } from "../hooks/use-toast.js";
 import { MessageCircle, UserPlus } from "lucide-react";
 import { queryClient } from "../lib/queryClient.js";
-import { XLogo } from "../components/ui/x-logo.jsx";
+import { ChatAppLogo } from "../components/ui/chat-app-logo.jsx";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -109,13 +109,13 @@ export default function AuthPage() {
         <CardContent className="p-10">
           <div className="text-center mb-10">
             <div className="w-20 h-20 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center shadow-xl">
-              <XLogo className="w-10 h-10 text-primary-foreground" />
+              <ChatAppLogo className="w-10 h-10 text-primary-foreground" />
             </div>
             <h2 className="text-3xl font-bold text-foreground mb-3">
-              {isLogin ? "Sign in to X" : "Join X today"}
+              {isLogin ? "Sign in to ChatApp" : "Join ChatApp today"}
             </h2>
             <p className="text-muted-foreground text-lg">
-              {isLogin ? "Welcome back to the conversation" : "See what's happening in the world right now"}
+              {isLogin ? "Welcome back to the conversation" : "Connect with friends and start chatting"}
             </p>
           </div>
 

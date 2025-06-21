@@ -66,7 +66,7 @@ export async function setupVite(app, server) {
 }
 
 export function serveStatic(app) {
-  const distPath = path.resolve(import.meta.dirname, "../dist/public");
+  const distPath = path.resolve(import.meta.dirname, "../dist");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
