@@ -26,10 +26,10 @@ export default function MessageBubble({ message, isOwn, showAvatar = true }) {
   };
 
   return (
-    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} animate-message-bounce`}>
       <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-start space-x-3 max-w-xs lg:max-w-md`}>
         {showAvatar && !isOwn && (
-          <div className={`w-8 h-8 bg-gradient-to-r ${getGradientClass(message.sender.id)} rounded-full flex items-center justify-center flex-shrink-0`}>
+          <div className={`w-8 h-8 bg-gradient-to-r ${getGradientClass(message.sender.id)} rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all hover:shadow-lg`}>
             <span className="text-white text-xs font-medium">
               {message.sender.initials}
             </span>
@@ -38,19 +38,19 @@ export default function MessageBubble({ message, isOwn, showAvatar = true }) {
         
         <div className={`${isOwn ? 'ml-3' : 'mr-3'}`}>
           {!isOwn && (
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 px-3">
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 px-3 font-medium">
               {message.sender.fullName}
             </p>
           )}
           
           <div
-            className={`px-4 py-2 rounded-2xl ${
+            className={`px-4 py-3 rounded-2xl shadow-sm transition-all hover:shadow-md ${
               isOwn
                 ? 'chat-gradient text-white rounded-br-sm'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm'
+                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm border border-gray-200 dark:border-gray-700'
             }`}
           >
-            <p className="text-sm break-words whitespace-pre-wrap">
+            <p className="text-sm break-words whitespace-pre-wrap leading-relaxed">
               {message.content}
             </p>
           </div>

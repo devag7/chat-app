@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button.jsx";
 import { Textarea } from "../ui/textarea.jsx";
 import { ScrollArea } from "../ui/scroll-area.jsx";
-import { Phone, Video, Info, Paperclip, Smile, Send, Users } from "lucide-react";
+import { Info, Send, Users } from "lucide-react";
 import MessageBubble from "./MessageBubble.jsx";
 import ChatDetails from "./ChatDetails.jsx";
 import { useWebSocket } from "../../hooks/useWebSocket.js";
@@ -116,30 +116,30 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col bg-white dark:bg-gray-900">
       {/* Chat Header */}
-      <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} rounded-full flex items-center justify-center`}>
+              <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} rounded-full flex items-center justify-center shadow-lg transition-all hover:shadow-xl`}>
                 <span className="text-white font-medium text-sm">
                   {otherUser ? otherUser.initials : chat.name.charAt(0).toUpperCase()}
                 </span>
               </div>
               {otherUser && (
-                <div className={isOtherUserOnline ? "online-indicator" : "offline-indicator"} />
+                <div className={`${isOtherUserOnline ? "online-indicator" : "offline-indicator"} transition-all`} />
               )}
             </div>
             <div>
-              <h3 className="font-medium text-gray-900 dark:text-white">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
                 {chat.isPrivate ? 
                   (otherUser ? otherUser.fullName : "Unknown User") : 
                   chat.name
                 }
               </h3>
               {chat.isPrivate ? (
-                <p className={`text-sm ${isOtherUserOnline ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}`}>
+                <p className={`text-sm transition-colors ${isOtherUserOnline ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}`}>
                   {isOtherUserOnline ? "Online" : "Offline"}
                 </p>
               ) : (
@@ -150,34 +150,20 @@ export default function ChatArea({
               )}
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm">
-              <Video className="w-5 h-5" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Phone className="w-5 h-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setShowChatDetails(true)}
-            >
-              <Info className="w-5 h-5" />
-            </Button>
-          </div>
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => setShowChatDetails(true)}
+            className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-full"
+          >
+            <Info className="w-5 h-5" />
+          </Button>
         </div>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {/* Debug: Show messages count */}
-          {messages.length > 0 && (
-            <div className="text-sm text-gray-500 mb-2">
-              {messages.length} message(s) loaded
-            </div>
-          )}
-          
+      <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-gray-50/30 to-gray-50/50 dark:from-gray-900/30 dark:to-gray-900/50">
+        <div className="space-y-3">
           {messages.filter(message => message && message.sender).map((message) => (
             <MessageBubble
               key={message.id}
@@ -187,22 +173,15 @@ export default function ChatArea({
             />
           ))}
           
-          {/* Debug: Show if no messages */}
-          {messages.length === 0 && (
-            <div className="text-sm text-gray-500 text-center">
-              No messages yet. Start the conversation!
-            </div>
-          )}
-          
           {/* Typing Indicator */}
           {chatTypingUsers.length > 0 && (
-            <div className="flex items-start space-x-3">
-              <div className={`w-8 h-8 bg-gradient-to-r ${getGradientClass(chatTypingUsers[0])} rounded-full flex items-center justify-center`}>
+            <div className="flex items-start space-x-3 animate-fade-in">
+              <div className={`w-8 h-8 bg-gradient-to-r ${getGradientClass(chatTypingUsers[0])} rounded-full flex items-center justify-center shadow-md`}>
                 <span className="text-white text-xs font-medium">
                   {otherUser?.initials || "U"}
                 </span>
               </div>
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-typing"></div>
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-typing-delay-1"></div>
@@ -217,11 +196,8 @@ export default function ChatArea({
       </ScrollArea>
 
       {/* Message Input */}
-      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 backdrop-blur-sm">
         <div className="flex items-end space-x-3">
-          <Button variant="ghost" size="sm">
-            <Paperclip className="w-5 h-5" />
-          </Button>
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
@@ -230,16 +206,13 @@ export default function ChatArea({
               value={messageContent}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="chat-input resize-none max-h-32 overflow-y-auto pr-10"
+              className="chat-input resize-none max-h-32 overflow-y-auto bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 rounded-2xl"
             />
-            <Button variant="ghost" size="sm" className="absolute right-2 bottom-2">
-              <Smile className="w-4 h-4" />
-            </Button>
           </div>
           <Button
             onClick={handleSendMessage}
             disabled={!messageContent.trim()}
-            className="chat-gradient hover:opacity-90 rounded-full p-3"
+            className="chat-gradient hover:opacity-90 rounded-full p-3 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             <Send className="w-5 h-5" />
           </Button>

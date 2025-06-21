@@ -84,7 +84,8 @@ export default function ChatSidebar({
     return chat.members.find(member => member.id !== user.id) || null;
   };
 
-  const filteredChats = chats.filter(chat => {
+  // Separate and sort DMs and Groups
+  const allFilteredChats = chats.filter(chat => {
     if (!searchTerm) return true;
     const otherUser = getOtherUser(chat);
     if (otherUser) {
@@ -92,6 +93,49 @@ export default function ChatSidebar({
     }
     return chat.name.toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+  // Separate DMs and Groups
+  const privateChats = allFilteredChats
+    .filter(chat => chat.isPrivate)
+    .sort((a, b) => {
+      // Sort by last message time first
+      const aTime = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const bTime = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      
+      if (aTime !== bTime) {
+        return bTime - aTime; // Recent messages first
+      }
+      
+      // Then by online status
+      const aUser = getOtherUser(a);
+      const bUser = getOtherUser(b);
+      const aOnline = aUser ? onlineUsers.has(aUser.id) : false;
+      const bOnline = bUser ? onlineUsers.has(bUser.id) : false;
+      
+      if (aOnline !== bOnline) {
+        return bOnline ? -1 : 1; // Online users first
+      }
+      
+      // Finally by name
+      const aName = aUser?.fullName || "Unknown";
+      const bName = bUser?.fullName || "Unknown";
+      return aName.localeCompare(bName);
+    });
+
+  const groupChats = allFilteredChats
+    .filter(chat => !chat.isPrivate)
+    .sort((a, b) => {
+      // Sort by last message time first
+      const aTime = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+      const bTime = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+      
+      if (aTime !== bTime) {
+        return bTime - aTime; // Recent messages first
+      }
+      
+      // Then by name
+      return a.name.localeCompare(b.name);
+    });
 
   const filteredUsers = users.filter(u => 
     u.fullName.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -103,27 +147,31 @@ export default function ChatSidebar({
   );
 
   return (
-    <div className="w-80 chat-sidebar flex flex-col">
+    <div className="w-80 chat-sidebar flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(user?.id || 0)} user-avatar`}>
+            <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(user?.id || 0)} user-avatar shadow-lg`}>
               <span className="text-sm">{user ? getInitials(user.fullName) : "U"}</span>
             </div>
             <div>
-              <h3 className="font-medium text-gray-900 dark:text-white">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
                 {user?.fullName || "User"}
               </h3>
               <div className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-xs text-gray-600 dark:text-gray-400">Online</span>
               </div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <Link href="/settings">
-              <Button variant="ghost" size="sm">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
                 <Settings className="w-4 h-4" />
               </Button>
             </Link>
@@ -132,6 +180,7 @@ export default function ChatSidebar({
               size="sm" 
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
+              className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <LogOut className="w-4 h-4" />
             </Button>
@@ -144,15 +193,23 @@ export default function ChatSidebar({
             placeholder="Search conversations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 rounded-xl"
           />
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              ×
+            </button>
+          )}
         </div>
 
         {/* Create Group Button */}
         <Button
           onClick={() => setShowCreateGroup(true)}
-          className="w-full mb-3 chat-gradient hover:opacity-90"
+          className="w-full mb-3 chat-gradient hover:opacity-90 shadow-lg transition-all duration-200 hover:shadow-xl"
           size="sm"
         >
           <Users className="w-4 h-4 mr-2" />
@@ -163,13 +220,14 @@ export default function ChatSidebar({
       {/* Chat List */}
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {/* Existing Chats */}
-          {filteredChats && filteredChats.length > 0 && (
-            <div>
-              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide">
-                Conversations
+          {/* Direct Messages */}
+          {privateChats && privateChats.length > 0 && (
+            <div className="mb-6">
+              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Direct Messages
               </h4>
-              {filteredChats.map((chat) => {
+              {privateChats.map((chat) => {
                 const otherUser = getOtherUser(chat);
                 const isSelected = selectedChatId === chat.id;
                 const isOnline = otherUser ? onlineUsers.has(otherUser.id) : false;
@@ -178,61 +236,50 @@ export default function ChatSidebar({
                   <div
                     key={chat.id}
                     onClick={() => onSelectChat(chat.id)}
-                    className={`p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer rounded-lg mb-1 transition-colors ${
-                      isSelected ? "chat-item-active" : ""
+                    className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer rounded-lg mb-1 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] animate-fade-in ${
+                      isSelected ? "chat-item-active shadow-md scale-[1.02]" : ""
                     }`}
                   >
                     <div className="flex items-start space-x-3">
                       <div className="relative">
-                        <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} user-avatar`}>
+                        <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} user-avatar shadow-md`}>
                           <span className="text-sm">
-                            {chat.isPrivate ? 
-                              (otherUser ? otherUser.initials : "U") : 
-                              chat.name.charAt(0).toUpperCase()
-                            }
+                            {otherUser ? otherUser.initials : "U"}
                           </span>
                         </div>
-                        {chat.isPrivate && <div className={isOnline ? "online-indicator" : "offline-indicator"} />}
-                        {!chat.isPrivate && (
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white dark:border-gray-900 rounded-full flex items-center justify-center">
-                            <Users className="w-2 h-2 text-white" />
-                          </div>
-                        )}
+                        <div className={isOnline ? "online-indicator" : "offline-indicator"} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <h4 className="font-medium text-gray-900 dark:text-white truncate">
-                            {chat.isPrivate ? 
-                              (otherUser ? otherUser.fullName : "Unknown User") : 
-                              chat.name
-                            }
+                            {otherUser ? otherUser.fullName : "Unknown User"}
                           </h4>
                           {chat.lastMessage && (
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
                               {formatTime(chat.lastMessage.createdAt)}
                             </span>
                           )}
                         </div>
                         {chat.lastMessage && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
                             {chat.lastMessage.content}
                           </p>
                         )}
-                        <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-1">
                             {chat.lastMessage && chat.lastMessage.senderId === user?.id && (
-                              <>
+                              <div className="flex items-center space-x-0.5">
                                 <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                 </svg>
                                 <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                 </svg>
-                              </>
+                              </div>
                             )}
                           </div>
                           {chat.unreadCount > 0 && (
-                            <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-medium">
+                            <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-medium shadow-sm">
                               {chat.unreadCount}
                             </div>
                           )}
@@ -242,6 +289,100 @@ export default function ChatSidebar({
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* Group Chats */}
+          {groupChats && groupChats.length > 0 && (
+            <div className={privateChats.length > 0 ? "mb-4 pt-4 border-t border-gray-200 dark:border-gray-700" : ""}>
+              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide flex items-center">
+                <Users className="w-3 h-3 mr-2" />
+                Group Chats
+              </h4>
+              {groupChats.map((chat) => {
+                const isSelected = selectedChatId === chat.id;
+                
+                return (
+                  <div
+                    key={chat.id}
+                    onClick={() => onSelectChat(chat.id)}
+                    className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer rounded-lg mb-1 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] animate-fade-in ${
+                      isSelected ? "chat-item-active shadow-md scale-[1.02]" : ""
+                    }`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="relative">
+                        <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(chat.id)} user-avatar shadow-md`}>
+                          <span className="text-sm">
+                            {chat.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white dark:border-gray-900 rounded-full flex items-center justify-center shadow-sm">
+                          <Users className="w-2 h-2 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                            {chat.name}
+                          </h4>
+                          {chat.lastMessage && (
+                            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
+                              {formatTime(chat.lastMessage.createdAt)}
+                            </span>
+                          )}
+                        </div>
+                        {chat.lastMessage && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
+                            {chat.lastMessage.content}
+                          </p>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+                            <Users className="w-3 h-3 mr-1" />
+                            {chat.members.length} member{chat.members.length !== 1 ? 's' : ''}
+                          </p>
+                          {chat.unreadCount > 0 && (
+                            <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-medium shadow-sm">
+                              {chat.unreadCount}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!searchTerm && privateChats.length === 0 && groupChats.length === 0 && (
+            <div className="text-center py-8 px-4">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                No conversations yet
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                Start a new chat or create a group to get started
+              </p>
+            </div>
+          )}
+
+          {/* Search Empty State */}
+          {searchTerm && privateChats.length === 0 && groupChats.length === 0 && (
+            <div className="text-center py-8 px-4">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                No results found
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Try searching with a different term
+              </p>
             </div>
           )}
 
