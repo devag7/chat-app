@@ -330,7 +330,7 @@ export async function registerRoutes(app) {
   const httpServer = createServer(app);
 
   // WebSocket server
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  const wss = new WebSocketServer({ server: httpServer, path: '/api/ws' });
 
   wss.on('connection', (ws, req) => {
     console.log('New WebSocket connection');
