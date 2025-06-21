@@ -281,12 +281,6 @@
   .animate-message-bounce {
     animation: messageBounce 0.4s ease-out;
   }
-  
-  .animate-gradient {
-    background: linear-gradient(-45deg, var(--primary), var(--x-blue), var(--primary), var(--x-blue));
-    background-size: 400% 400%;
-    animation: gradientShift 6s ease infinite;
-  }
 }
 
 @keyframes typing {
@@ -332,17 +326,5 @@
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
   }
 }

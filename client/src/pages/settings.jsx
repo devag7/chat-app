@@ -116,19 +116,12 @@ export default function SettingsPage() {
   };
 
   const getGradientClass = (id) => {
-    const gradients = [
-      "from-blue-500 to-purple-500",
-      "from-green-500 to-teal-500",
-      "from-pink-500 to-rose-500",
-      "from-orange-500 to-red-500",
-      "from-purple-500 to-indigo-500",
-      "from-yellow-500 to-orange-500",
-    ];
-    return gradients[id % gradients.length];
+    // X.com style - solid colors only (black/white with blue accent)
+    return "from-muted to-muted bg-muted";
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-6">
@@ -138,8 +131,8 @@ export default function SettingsPage() {
               Back to Chat
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+          <p className="text-muted-foreground mt-2">
             Manage your account settings and preferences
           </p>
         </div>
@@ -156,16 +149,16 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center space-x-4 mb-6">
-                  <div className={`w-16 h-16 bg-gradient-to-r ${getGradientClass(user?.id || 0)} rounded-full flex items-center justify-center`}>
-                    <span className="text-white font-medium text-lg">
+                  <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+                    <span className="text-primary-foreground font-medium text-lg">
                       {user ? getInitials(user.fullName) : "U"}
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">
+                    <h3 className="font-medium text-foreground">
                       {user?.fullName}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       @{user?.username}
                     </p>
                   </div>
@@ -220,7 +213,7 @@ export default function SettingsPage() {
 
                   <Button
                     type="submit"
-                    className="chat-gradient hover:opacity-90"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     disabled={updateProfileMutation.isPending}
                   >
                     {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
@@ -289,7 +282,7 @@ export default function SettingsPage() {
 
                   <Button
                     type="submit"
-                    className="chat-gradient hover:opacity-90"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     disabled={changePasswordMutation.isPending}
                     >
                     {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
@@ -312,7 +305,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="notifications">Push Notifications</Label>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Receive notifications for new messages
                     </p>
                   </div>
@@ -328,7 +321,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="sounds">Sound Effects</Label>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Play sounds for message notifications
                     </p>
                   </div>
@@ -352,7 +345,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <Label htmlFor="darkmode">Dark Mode</Label>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       Switch to dark theme
                     </p>
                   </div>

@@ -5,7 +5,7 @@ import './server/db.js';
 import { storage } from './server/storage.js';
 import { User, ChatRoom, Message } from './shared/schema.js';
 
-console.log('✅ ChatterConnect Codebase Test');
+console.log('✅ ChatApp Codebase Test');
 console.log('✅ All imports successful');
 console.log('✅ MongoDB schemas loaded');
 console.log('✅ Storage class initialized');

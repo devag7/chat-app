@@ -76,15 +76,8 @@ export default function CreateGroupModal({ isOpen, onClose, users, currentUserId
   };
 
   const getGradientClass = (id) => {
-    const gradients = [
-      "from-blue-500 to-purple-500",
-      "from-green-500 to-teal-500", 
-      "from-pink-500 to-rose-500",
-      "from-orange-500 to-red-500",
-      "from-purple-500 to-indigo-500",
-      "from-yellow-500 to-orange-500",
-    ];
-    return gradients[(id || "").toString().length % gradients.length];
+    // X.com style - solid colors only (black/white with blue accent)
+    return "from-muted to-muted bg-muted";
   };
 
   const availableUsers = users?.filter(user => user.id !== currentUserId) || [];
@@ -126,8 +119,8 @@ export default function CreateGroupModal({ isOpen, onClose, users, currentUserId
                       checked={selectedUsers.has(user.id)}
                       onCheckedChange={() => handleUserToggle(user.id)}
                     />
-                    <div className={`w-8 h-8 bg-gradient-to-r ${getGradientClass(user.id)} rounded-full flex items-center justify-center`}>
-                      <span className="text-white text-xs font-medium">
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                      <span className="text-primary-foreground text-xs font-medium">
                         {user.initials}
                       </span>
                     </div>

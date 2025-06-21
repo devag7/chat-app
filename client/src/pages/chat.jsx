@@ -104,7 +104,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen flex bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen flex bg-background">
       <ChatSidebar
         user={user}
         chats={chats || []}
@@ -131,7 +131,7 @@ export default function ChatPage() {
               <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
                 <MessageCircle className="w-12 h-12" />
               </div>
-              <h3 className="text-2xl font-bold text-foreground mb-4">Welcome to ChatterConnect</h3>
+              <h3 className="text-2xl font-bold text-foreground mb-4">Welcome to ChatApp</h3>
               <p className="text-lg">Select a chat or start a new conversation to begin messaging</p>
             </div>
           </div>

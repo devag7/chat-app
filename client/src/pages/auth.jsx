@@ -243,7 +243,7 @@ export default function AuthPage() {
               
               <Button
                 type="submit"
-                className="w-full chat-gradient hover:opacity-90"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                 disabled={registerMutation.isPending}
               >
                 {registerMutation.isPending ? "Creating Account..." : "Create Account"}

@@ -104,15 +104,8 @@ export default function ChatArea({
     .map(([chatId, userId]) => userId);
 
   const getGradientClass = (id) => {
-    const gradients = [
-      "from-blue-500 to-purple-500",
-      "from-green-500 to-teal-500",
-      "from-pink-500 to-rose-500",
-      "from-orange-500 to-red-500",
-      "from-purple-500 to-indigo-500",
-      "from-yellow-500 to-orange-500",
-    ];
-    return gradients[id % gradients.length];
+    // X.com style - solid colors only (black/white with blue accent)
+    return "from-muted to-muted bg-muted";
   };
 
   return (
@@ -122,8 +115,8 @@ export default function ChatArea({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} rounded-full flex items-center justify-center shadow-lg transition-all hover:shadow-xl ring-2 ring-border`}>
-                <span className="text-white font-bold text-lg">
+              <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg transition-all hover:shadow-xl ring-2 ring-border">
+                <span className="text-primary-foreground font-bold text-lg">
                   {otherUser ? otherUser.initials : chat.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -176,8 +169,8 @@ export default function ChatArea({
           {/* Typing Indicator */}
           {chatTypingUsers.length > 0 && (
             <div className="flex items-start space-x-4 animate-fade-in">
-              <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(chatTypingUsers[0])} rounded-full flex items-center justify-center shadow-md`}>
-                <span className="text-white text-sm font-bold">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-md">
+                <span className="text-primary-foreground text-sm font-bold">
                   {otherUser?.initials || "U"}
                 </span>
               </div>

@@ -30,7 +30,7 @@ function Router() {
       ) : (
         <Route path="/" component={AuthPage} />
       )}
-      <Route component={() => <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 text-gray-900 dark:text-white">404 - Page Not Found</div>} />
+      <Route component={() => <div className="min-h-screen flex items-center justify-center bg-background text-foreground">404 - Page Not Found</div>} />
     </Switch>
   );
 }

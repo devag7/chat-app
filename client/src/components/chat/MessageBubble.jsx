@@ -7,15 +7,8 @@ export default function MessageBubble({ message, isOwn, showAvatar = true }) {
   }
 
   const getGradientClass = (id) => {
-    const gradients = [
-      "from-blue-500 to-purple-500",
-      "from-green-500 to-teal-500", 
-      "from-pink-500 to-rose-500",
-      "from-orange-500 to-red-500",
-      "from-purple-500 to-indigo-500",
-      "from-yellow-500 to-orange-500",
-    ];
-    return gradients[id % gradients.length];
+    // X.com style - solid colors only (black/white with blue accent)
+    return "from-muted to-muted bg-muted";
   };
 
   const formatTime = (date) => {
@@ -29,8 +22,8 @@ export default function MessageBubble({ message, isOwn, showAvatar = true }) {
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} animate-message-bounce`}>
       <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-start space-x-4 max-w-lg lg:max-w-xl`}>
         {showAvatar && !isOwn && (
-          <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(message.sender.id)} rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all hover:shadow-lg ring-2 ring-border`}>
-            <span className="text-white text-sm font-bold">
+          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all hover:shadow-lg ring-2 ring-border">
+            <span className="text-primary-foreground text-sm font-bold">
               {message.sender.initials}
             </span>
           </div>

@@ -1,4 +1,4 @@
-# ChatterConnect
+# ChatApp
 
 ✅ **FULLY CONVERTED TO JAVASCRIPT** - TypeScript removal complete!
 
@@ -25,7 +25,7 @@ A modern real-time chat application built with React, Node.js, Express, and Mong
 
 ```bash
 git clone <repository-url>
-cd ChatterConnect
+cd ChatApp
 ```
 
 ### 2. Install Dependencies
@@ -50,7 +50,7 @@ npm install
 
 2. Edit the `.env` file and add your MongoDB Atlas connection string:
    ```env
-   MONGODB_URI=mongodb+srv://username:password@cluster.abc123.mongodb.net/chatterconnect?retryWrites=true&w=majority
+   MONGODB_URI=mongodb+srv://username:password@cluster.abc123.mongodb.net/chatapp?retryWrites=true&w=majority
    SESSION_SECRET=your-super-secret-session-key-here
    NODE_ENV=development
    PORT=5000
@@ -60,7 +60,7 @@ npm install
    - `username` with your MongoDB Atlas username
    - `password` with your MongoDB Atlas password
    - `cluster.abc123.mongodb.net` with your actual cluster address
-   - `chatterconnect` with your preferred database name
+   - `chatapp` with your preferred database name
 
 ### 5. Start the Application
 
@@ -85,7 +85,7 @@ http://localhost:5000
 ## Project Structure
 
 ```
-ChatterConnect/
+ChatApp/
 ├── client/                 # React frontend
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
