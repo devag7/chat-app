@@ -342,6 +342,7 @@ export class DatabaseStorage {
       return {
         ...populatedMessage,
         id: populatedMessage._id.toString(),
+        chatRoomId: populatedMessage.chatRoom.toString(),
         senderId: populatedMessage.sender._id.toString(),
         sender: {
           ...populatedMessage.sender,
@@ -365,6 +366,7 @@ export class DatabaseStorage {
       return messages.reverse().map(message => ({
         ...message,
         id: message._id.toString(),
+        chatRoomId: message.chatRoom.toString(),
         senderId: message.sender._id.toString(),
         sender: {
           ...message.sender,

@@ -19,7 +19,11 @@ export default function ChatPage() {
 
   const handleSendMessage = (content) => {
     if (selectedChatId && content.trim()) {
-      sendMessage(selectedChatId, content);
+      sendMessage({
+        type: "message",
+        chatRoom: selectedChatId,
+        content: content.trim()
+      });
     }
   };
 
@@ -58,7 +62,7 @@ export default function ChatPage() {
 
   const handleCreateGroup = async (data) => {
     try {
-      const response = await fetch("/api/groups", {
+      const response = await fetch("/api/chats/group", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -100,6 +104,7 @@ export default function ChatPage() {
   return (
     <div className="h-screen flex bg-gray-50 dark:bg-gray-900">
       <ChatSidebar
+        user={user}
         chats={chats || []}
         users={users || []}
         selectedChatId={selectedChatId}
