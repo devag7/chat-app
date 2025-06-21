@@ -31,7 +31,7 @@ export function useWebSocket(userId) {
           case "new_message":
             // Invalidate messages query to refetch
             queryClient.invalidateQueries({ 
-              queryKey: ["/api/chats", message.message.chatRoomId, "messages"] 
+              queryKey: [`/api/chats/${message.message.chatRoomId}/messages`] 
             });
             // Also invalidate chats to update last message
             queryClient.invalidateQueries({ queryKey: ["/api/chats"] });

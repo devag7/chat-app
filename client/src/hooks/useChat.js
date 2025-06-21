@@ -12,7 +12,7 @@ export function useChat(selectedChatId) {
   });
 
   const { data: messages, isLoading: messagesLoading } = useQuery({
-    queryKey: ["/api/chats", selectedChatId, "messages"],
+    queryKey: [`/api/chats/${selectedChatId}/messages`],
     enabled: !!selectedChatId,
     refetchInterval: selectedChatId ? 1000 : false, // Refetch every second when chat is selected
   });

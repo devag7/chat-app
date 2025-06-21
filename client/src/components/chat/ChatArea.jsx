@@ -171,6 +171,13 @@ export default function ChatArea({
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
+          {/* Debug: Show messages count */}
+          {messages.length > 0 && (
+            <div className="text-sm text-gray-500 mb-2">
+              {messages.length} message(s) loaded
+            </div>
+          )}
+          
           {messages.filter(message => message && message.sender).map((message) => (
             <MessageBubble
               key={message.id}
@@ -179,6 +186,13 @@ export default function ChatArea({
               showAvatar={true}
             />
           ))}
+          
+          {/* Debug: Show if no messages */}
+          {messages.length === 0 && (
+            <div className="text-sm text-gray-500 text-center">
+              No messages yet. Start the conversation!
+            </div>
+          )}
           
           {/* Typing Indicator */}
           {chatTypingUsers.length > 0 && (
