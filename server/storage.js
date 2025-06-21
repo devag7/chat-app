@@ -43,6 +43,12 @@ export class DatabaseStorage {
   async getUserById(id) {
     try {
       const user = await User.findById(id).lean();
+      if (user) {
+        return {
+          ...user,
+          id: user._id.toString()
+        };
+      }
       return user;
     } catch (error) {
       throw error;
