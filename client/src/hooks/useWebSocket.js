@@ -10,7 +10,10 @@ export function useWebSocket(userId) {
     if (!userId) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const host = window.location.host || 'localhost:3000'; // Fallback to ensure we have a host
+    const wsUrl = `${protocol}//${host}/ws`;
+    
+    console.log('WebSocket connecting to:', wsUrl);
     
     ws.current = new WebSocket(wsUrl);
 
