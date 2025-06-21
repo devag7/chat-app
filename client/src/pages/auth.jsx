@@ -57,8 +57,15 @@ export default function AuthPage() {
       const response = await apiRequest("POST", "/api/auth/login", data);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    onSuccess: (userData) => {
+      // Set the user data directly in the query cache
+      queryClient.setQueryData(["/api/auth/me"], userData);
+      
+      // Also invalidate after a short delay to ensure session is established
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      }, 100);
+      
       toast({
         title: "Success",
         description: "Logged in successfully!",
@@ -79,8 +86,15 @@ export default function AuthPage() {
       const response = await apiRequest("POST", "/api/auth/register", registerData);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+    onSuccess: (userData) => {
+      // Set the user data directly in the query cache
+      queryClient.setQueryData(["/api/auth/me"], userData);
+      
+      // Also invalidate after a short delay to ensure session is established
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/me"] });
+      }, 100);
+      
       toast({
         title: "Success",
         description: "Account created successfully!",
