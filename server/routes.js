@@ -28,13 +28,24 @@ export async function registerRoutes(app) {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    name: 'chatapp.sid', // Custom session name
     cookie: {
-      secure: false, // Set to false for development, true for production with HTTPS
+      secure: false, // Set to false for development
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       sameSite: 'lax' // Allow cross-site requests with cookies
     }
   }));
+
+  // Debug middleware to log session info in development
+  if (process.env.NODE_ENV === 'development') {
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/api/auth')) {
+        console.log(`Auth request: ${req.method} ${req.path}, Session ID: ${req.sessionID || 'none'}, User ID: ${req.session?.userId || 'none'}`);
+      }
+      next();
+    });
+  }
 
   const clients = new Map();
 
