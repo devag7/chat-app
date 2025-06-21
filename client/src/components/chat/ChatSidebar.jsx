@@ -147,32 +147,32 @@ export default function ChatSidebar({
   );
 
   return (
-    <div className="w-80 chat-sidebar flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+    <div className="w-80 flex flex-col bg-background border-r border-border">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-6 border-b border-border">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(user?.id || 0)} user-avatar shadow-lg`}>
-              <span className="text-sm">{user ? getInitials(user.fullName) : "U"}</span>
+            <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(user?.id || 0)} user-avatar shadow-lg ring-2 ring-border`}>
+              <span className="text-base font-bold">{user ? getInitials(user.fullName) : "U"}</span>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
+              <h3 className="font-bold text-lg text-foreground">
                 {user?.fullName || "User"}
               </h3>
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-xs text-gray-600 dark:text-gray-400">Online</span>
+                <span className="text-sm text-muted-foreground">Online</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             <Link href="/settings">
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="hover:bg-muted transition-all duration-200 rounded-full p-2"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-5 h-5" />
               </Button>
             </Link>
             <Button 
@@ -180,26 +180,26 @@ export default function ChatSidebar({
               size="sm" 
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
-              className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="hover:bg-muted transition-all duration-200 rounded-full p-2"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
         
         {/* Search */}
-        <div className="relative mb-3">
+        <div className="relative mb-4">
           <Input
             placeholder="Search conversations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 rounded-xl"
+            className="pl-12 pr-10 bg-muted border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 rounded-full h-12 text-base"
           />
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-4 top-3 w-6 h-6 text-muted-foreground" />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-2.5 w-4 h-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-4 top-3 w-6 h-6 text-muted-foreground hover:text-foreground transition-colors rounded-full flex items-center justify-center text-xl font-medium"
             >
               ×
             </button>
@@ -209,10 +209,10 @@ export default function ChatSidebar({
         {/* Create Group Button */}
         <Button
           onClick={() => setShowCreateGroup(true)}
-          className="w-full mb-3 chat-gradient hover:opacity-90 shadow-lg transition-all duration-200 hover:shadow-xl"
-          size="sm"
+          className="w-full mb-4 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-200 hover:shadow-xl rounded-full h-12 font-bold text-base"
+          size="lg"
         >
-          <Users className="w-4 h-4 mr-2" />
+          <Users className="w-5 h-5 mr-3" />
           Create Group
         </Button>
       </div>
@@ -223,8 +223,8 @@ export default function ChatSidebar({
           {/* Direct Messages */}
           {privateChats && privateChats.length > 0 && (
             <div className="mb-6">
-              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide flex items-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+              <h4 className="text-sm font-bold text-muted-foreground px-4 py-3 uppercase tracking-wider flex items-center">
+                <div className="w-3 h-3 bg-green-500 rounded-full mr-3 animate-pulse"></div>
                 Direct Messages
               </h4>
               {privateChats.map((chat) => {
@@ -236,50 +236,50 @@ export default function ChatSidebar({
                   <div
                     key={chat.id}
                     onClick={() => onSelectChat(chat.id)}
-                    className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer rounded-lg mb-1 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] animate-fade-in ${
+                    className={`mx-2 p-4 hover:bg-muted cursor-pointer rounded-xl mb-2 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] animate-fade-in ${
                       isSelected ? "chat-item-active shadow-md scale-[1.02]" : ""
                     }`}
                   >
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-start space-x-4">
                       <div className="relative">
-                        <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} user-avatar shadow-md`}>
-                          <span className="text-sm">
+                        <div className={`w-14 h-14 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} user-avatar shadow-lg`}>
+                          <span className="text-lg font-bold">
                             {otherUser ? otherUser.initials : "U"}
                           </span>
                         </div>
-                        <div className={isOnline ? "online-indicator" : "offline-indicator"} />
+                        <div className={`${isOnline ? "online-indicator" : "offline-indicator"} transition-all`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-bold text-foreground truncate text-lg">
                             {otherUser ? otherUser.fullName : "Unknown User"}
                           </h4>
                           {chat.lastMessage && (
-                            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
+                            <span className="text-sm text-muted-foreground flex-shrink-0 ml-3">
                               {formatTime(chat.lastMessage.createdAt)}
                             </span>
                           )}
                         </div>
                         {chat.lastMessage && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
+                          <p className="text-muted-foreground truncate mb-2 text-base">
                             {chat.lastMessage.content}
                           </p>
                         )}
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-2">
                             {chat.lastMessage && chat.lastMessage.senderId === user?.id && (
-                              <div className="flex items-center space-x-0.5">
-                                <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                              <div className="flex items-center space-x-1">
+                                <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                 </svg>
-                                <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
                                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
                                 </svg>
                               </div>
                             )}
                           </div>
                           {chat.unreadCount > 0 && (
-                            <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-medium shadow-sm">
+                            <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
                               {chat.unreadCount}
                             </div>
                           )}
@@ -294,9 +294,9 @@ export default function ChatSidebar({
 
           {/* Group Chats */}
           {groupChats && groupChats.length > 0 && (
-            <div className={privateChats.length > 0 ? "mb-4 pt-4 border-t border-gray-200 dark:border-gray-700" : ""}>
-              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2 py-2 uppercase tracking-wide flex items-center">
-                <Users className="w-3 h-3 mr-2" />
+            <div className={privateChats.length > 0 ? "mb-6 pt-6 border-t border-border" : ""}>
+              <h4 className="text-sm font-bold text-muted-foreground px-4 py-3 uppercase tracking-wider flex items-center">
+                <Users className="w-4 h-4 mr-3" />
                 Group Chats
               </h4>
               {groupChats.map((chat) => {
@@ -306,44 +306,44 @@ export default function ChatSidebar({
                   <div
                     key={chat.id}
                     onClick={() => onSelectChat(chat.id)}
-                    className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer rounded-lg mb-1 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] animate-fade-in ${
+                    className={`mx-2 p-4 hover:bg-muted cursor-pointer rounded-xl mb-2 transition-all duration-200 hover:shadow-sm hover:scale-[1.02] animate-fade-in ${
                       isSelected ? "chat-item-active shadow-md scale-[1.02]" : ""
                     }`}
                   >
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-start space-x-4">
                       <div className="relative">
-                        <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(chat.id)} user-avatar shadow-md`}>
-                          <span className="text-sm">
+                        <div className={`w-14 h-14 bg-gradient-to-r ${getGradientClass(chat.id)} user-avatar shadow-lg`}>
+                          <span className="text-lg font-bold">
                             {chat.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 border-2 border-white dark:border-gray-900 rounded-full flex items-center justify-center shadow-sm">
-                          <Users className="w-2 h-2 text-white" />
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary border-3 border-background rounded-full flex items-center justify-center shadow-sm">
+                          <Users className="w-3 h-3 text-primary-foreground" />
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-bold text-foreground truncate text-lg">
                             {chat.name}
                           </h4>
                           {chat.lastMessage && (
-                            <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
+                            <span className="text-sm text-muted-foreground flex-shrink-0 ml-3">
                               {formatTime(chat.lastMessage.createdAt)}
                             </span>
                           )}
                         </div>
                         {chat.lastMessage && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 truncate mb-1">
+                          <p className="text-muted-foreground truncate mb-2 text-base">
                             {chat.lastMessage.content}
                           </p>
                         )}
                         <div className="flex items-center justify-between">
-                          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                            <Users className="w-3 h-3 mr-1" />
+                          <p className="text-sm text-muted-foreground flex items-center">
+                            <Users className="w-4 h-4 mr-2" />
                             {chat.members.length} member{chat.members.length !== 1 ? 's' : ''}
                           </p>
                           {chat.unreadCount > 0 && (
-                            <div className="w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-xs font-medium shadow-sm">
+                            <div className="w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold shadow-sm">
                               {chat.unreadCount}
                             </div>
                           )}
@@ -358,14 +358,14 @@ export default function ChatSidebar({
 
           {/* Empty State */}
           {!searchTerm && privateChats.length === 0 && groupChats.length === 0 && (
-            <div className="text-center py-8 px-4">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-gray-400" />
+            <div className="text-center py-12 px-6">
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users className="w-10 h-10 text-muted-foreground" />
               </div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-3">
                 No conversations yet
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              <p className="text-muted-foreground mb-6 text-base leading-relaxed">
                 Start a new chat or create a group to get started
               </p>
             </div>
@@ -373,14 +373,14 @@ export default function ChatSidebar({
 
           {/* Search Empty State */}
           {searchTerm && privateChats.length === 0 && groupChats.length === 0 && (
-            <div className="text-center py-8 px-4">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-8 h-8 text-gray-400" />
+            <div className="text-center py-12 px-6">
+              <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="w-10 h-10 text-muted-foreground" />
               </div>
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+              <h3 className="text-xl font-bold text-foreground mb-3">
                 No results found
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground text-base">
                 Try searching with a different term
               </p>
             </div>

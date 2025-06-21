@@ -116,14 +116,14 @@ export default function ChatArea({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-gray-900">
+    <div className="flex-1 flex flex-col bg-background">
       {/* Chat Header */}
-      <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 backdrop-blur-sm">
+      <div className="p-6 bg-background border-b border-border backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             <div className="relative">
-              <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} rounded-full flex items-center justify-center shadow-lg transition-all hover:shadow-xl`}>
-                <span className="text-white font-medium text-sm">
+              <div className={`w-12 h-12 bg-gradient-to-r ${getGradientClass(otherUser?.id || chat.id)} rounded-full flex items-center justify-center shadow-lg transition-all hover:shadow-xl ring-2 ring-border`}>
+                <span className="text-white font-bold text-lg">
                   {otherUser ? otherUser.initials : chat.name.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -132,19 +132,19 @@ export default function ChatArea({
               )}
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">
+              <h3 className="font-bold text-xl text-foreground">
                 {chat.isPrivate ? 
                   (otherUser ? otherUser.fullName : "Unknown User") : 
                   chat.name
                 }
               </h3>
               {chat.isPrivate ? (
-                <p className={`text-sm transition-colors ${isOtherUserOnline ? "text-green-600 dark:text-green-400" : "text-gray-500 dark:text-gray-400"}`}>
+                <p className={`text-base transition-colors ${isOtherUserOnline ? "text-green-500 font-medium" : "text-muted-foreground"}`}>
                   {isOtherUserOnline ? "Online" : "Offline"}
                 </p>
               ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                  <Users className="w-3 h-3 mr-1" />
+                <p className="text-base text-muted-foreground flex items-center">
+                  <Users className="w-4 h-4 mr-2" />
                   {chat.members.length} member{chat.members.length !== 1 ? 's' : ''}
                 </p>
               )}
@@ -152,18 +152,18 @@ export default function ChatArea({
           </div>
           <Button 
             variant="ghost" 
-            size="sm"
+            size="lg"
             onClick={() => setShowChatDetails(true)}
-            className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 rounded-full"
+            className="hover:bg-muted transition-all duration-200 rounded-full p-3"
           >
-            <Info className="w-5 h-5" />
+            <Info className="w-6 h-6" />
           </Button>
         </div>
       </div>
 
       {/* Messages */}
-      <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-gray-50/30 to-gray-50/50 dark:from-gray-900/30 dark:to-gray-900/50">
-        <div className="space-y-3">
+      <ScrollArea className="flex-1 p-6 bg-background">
+        <div className="space-y-4 max-w-4xl mx-auto">
           {messages.filter(message => message && message.sender).map((message) => (
             <MessageBubble
               key={message.id}
@@ -175,17 +175,17 @@ export default function ChatArea({
           
           {/* Typing Indicator */}
           {chatTypingUsers.length > 0 && (
-            <div className="flex items-start space-x-3 animate-fade-in">
-              <div className={`w-8 h-8 bg-gradient-to-r ${getGradientClass(chatTypingUsers[0])} rounded-full flex items-center justify-center shadow-md`}>
-                <span className="text-white text-xs font-medium">
+            <div className="flex items-start space-x-4 animate-fade-in">
+              <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(chatTypingUsers[0])} rounded-full flex items-center justify-center shadow-md`}>
+                <span className="text-white text-sm font-bold">
                   {otherUser?.initials || "U"}
                 </span>
               </div>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-typing"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-typing-delay-1"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-typing-delay-2"></div>
+              <div className="bg-muted rounded-2xl rounded-tl-sm px-6 py-4 shadow-sm border border-border">
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-typing"></div>
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-typing-delay-1"></div>
+                  <div className="w-2 h-2 bg-muted-foreground rounded-full animate-typing-delay-2"></div>
                 </div>
               </div>
             </div>
@@ -196,26 +196,28 @@ export default function ChatArea({
       </ScrollArea>
 
       {/* Message Input */}
-      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 backdrop-blur-sm">
-        <div className="flex items-end space-x-3">
-          <div className="flex-1 relative">
-            <Textarea
-              ref={textareaRef}
-              rows={1}
-              placeholder="Type a message..."
-              value={messageContent}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              className="chat-input resize-none max-h-32 overflow-y-auto bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 rounded-2xl"
-            />
+      <div className="p-6 bg-background border-t border-border backdrop-blur-sm">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-end space-x-4">
+            <div className="flex-1 relative">
+              <Textarea
+                ref={textareaRef}
+                rows={1}
+                placeholder="Start a new message..."
+                value={messageContent}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                className="chat-input resize-none max-h-32 overflow-y-auto bg-muted border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 rounded-3xl text-base px-6 py-4"
+              />
+            </div>
+            <Button
+              onClick={handleSendMessage}
+              disabled={!messageContent.trim()}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full p-4 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              <Send className="w-6 h-6" />
+            </Button>
           </div>
-          <Button
-            onClick={handleSendMessage}
-            disabled={!messageContent.trim()}
-            className="chat-gradient hover:opacity-90 rounded-full p-3 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            <Send className="w-5 h-5" />
-          </Button>
         </div>
       </div>
 

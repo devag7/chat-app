@@ -11,6 +11,7 @@ import { apiRequest } from "../lib/queryClient.js";
 import { useToast } from "../hooks/use-toast.js";
 import { MessageCircle, UserPlus } from "lucide-react";
 import { queryClient } from "../lib/queryClient.js";
+import { XLogo } from "../components/ui/x-logo.jsx";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -103,54 +104,50 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardContent className="p-8">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 chat-gradient rounded-full mx-auto mb-4 flex items-center justify-center">
-              {isLogin ? (
-                <MessageCircle className="w-8 h-8 text-white" />
-              ) : (
-                <UserPlus className="w-8 h-8 text-white" />
-              )}
+    <div className="min-h-screen flex items-center justify-center p-6 bg-background">
+      <Card className="w-full max-w-lg shadow-2xl border-border bg-card">
+        <CardContent className="p-10">
+          <div className="text-center mb-10">
+            <div className="w-20 h-20 bg-primary rounded-full mx-auto mb-6 flex items-center justify-center shadow-xl">
+              <XLogo className="w-10 h-10 text-primary-foreground" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              {isLogin ? "Welcome Back" : "Create Account"}
+            <h2 className="text-3xl font-bold text-foreground mb-3">
+              {isLogin ? "Sign in to X" : "Join X today"}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              {isLogin ? "Sign in to continue chatting" : "Join the conversation today"}
+            <p className="text-muted-foreground text-lg">
+              {isLogin ? "Welcome back to the conversation" : "See what's happening in the world right now"}
             </p>
           </div>
 
           {isLogin ? (
-            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-base font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter your email"
                   {...loginForm.register("email")}
-                  className="mt-2"
+                  className="mt-3 h-14 text-base rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary"
                 />
                 {loginForm.formState.errors.email && (
-                  <p className="text-sm text-red-500 mt-1">
+                  <p className="text-sm text-destructive mt-2">
                     {loginForm.formState.errors.email.message}
                   </p>
                 )}
               </div>
               
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-base font-medium">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="Enter your password"
                   {...loginForm.register("password")}
-                  className="mt-2"
+                  className="mt-3 h-14 text-base rounded-xl border-border bg-muted focus:ring-2 focus:ring-primary"
                 />
                 {loginForm.formState.errors.password && (
-                  <p className="text-sm text-red-500 mt-1">
+                  <p className="text-sm text-destructive mt-2">
                     {loginForm.formState.errors.password.message}
                   </p>
                 )}
@@ -158,7 +155,7 @@ export default function AuthPage() {
               
               <Button
                 type="submit"
-                className="w-full chat-gradient hover:opacity-90"
+                className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg rounded-full"
                 disabled={loginMutation.isPending}
               >
                 {loginMutation.isPending ? "Signing In..." : "Sign In"}
@@ -254,14 +251,14 @@ export default function AuthPage() {
             </form>
           )}
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 dark:text-gray-400">
+          <div className="mt-8 text-center">
+            <p className="text-muted-foreground text-base">
               {isLogin ? "Don't have an account? " : "Already have an account? "}
               <button
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-primary hover:underline font-medium"
+                className="text-primary hover:underline font-bold"
               >
-                {isLogin ? "Sign Up" : "Sign In"}
+                {isLogin ? "Sign up" : "Sign in"}
               </button>
             </p>
           </div>

@@ -27,41 +27,41 @@ export default function MessageBubble({ message, isOwn, showAvatar = true }) {
 
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} animate-message-bounce`}>
-      <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-start space-x-3 max-w-xs lg:max-w-md`}>
+      <div className={`flex ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-start space-x-4 max-w-lg lg:max-w-xl`}>
         {showAvatar && !isOwn && (
-          <div className={`w-8 h-8 bg-gradient-to-r ${getGradientClass(message.sender.id)} rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all hover:shadow-lg`}>
-            <span className="text-white text-xs font-medium">
+          <div className={`w-10 h-10 bg-gradient-to-r ${getGradientClass(message.sender.id)} rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all hover:shadow-lg ring-2 ring-border`}>
+            <span className="text-white text-sm font-bold">
               {message.sender.initials}
             </span>
           </div>
         )}
         
-        <div className={`${isOwn ? 'ml-3' : 'mr-3'}`}>
+        <div className={`${isOwn ? 'ml-4' : 'mr-4'}`}>
           {!isOwn && (
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 px-3 font-medium">
+            <p className="text-sm text-muted-foreground mb-2 px-4 font-semibold">
               {message.sender.fullName}
             </p>
           )}
           
           <div
-            className={`px-4 py-3 rounded-2xl shadow-sm transition-all hover:shadow-md ${
+            className={`px-6 py-4 shadow-lg transition-all hover:shadow-xl ${
               isOwn
-                ? 'chat-gradient text-white rounded-br-sm'
-                : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-sm border border-gray-200 dark:border-gray-700'
+                ? 'bg-primary text-primary-foreground rounded-3xl rounded-br-lg'
+                : 'bg-muted text-foreground rounded-3xl rounded-bl-lg border border-border'
             }`}
           >
-            <p className="text-sm break-words whitespace-pre-wrap leading-relaxed">
+            <p className="text-base break-words whitespace-pre-wrap leading-relaxed">
               {message.content}
             </p>
           </div>
           
-          <div className={`flex items-center mt-1 px-3 ${isOwn ? 'justify-end' : 'justify-start'}`}>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+          <div className={`flex items-center mt-2 px-4 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+            <span className="text-sm text-muted-foreground">
               {formatTime(message.createdAt)}
             </span>
             {isOwn && (
-              <div className="ml-1 flex items-center">
-                <CheckCheck className="w-3 h-3 text-blue-500" />
+              <div className="ml-2 flex items-center">
+                <CheckCheck className="w-4 h-4 text-primary" />
               </div>
             )}
           </div>

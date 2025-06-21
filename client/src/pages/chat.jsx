@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { MessageCircle } from "lucide-react";
 import ChatSidebar from "../components/chat/ChatSidebar.jsx";
 import ChatArea from "../components/chat/ChatArea.jsx";
 import { useChat } from "../hooks/useChat.js";
 import { useWebSocket } from "../hooks/useWebSocket.js";
 import { useAuth } from "../hooks/useAuth.js";
+import { FloatingComposeButton } from "../components/ui/floating-compose.jsx";
 
 export default function ChatPage() {
   const { user } = useAuth();
@@ -124,13 +126,27 @@ export default function ChatPage() {
             typingUsers={typingUsers}
           />
         ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
-            <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">Welcome to ChatterConnect</h3>
-              <p>Select a chat or start a new conversation to begin messaging</p>
+          <div className="flex-1 flex items-center justify-center text-muted-foreground">
+            <div className="text-center p-12">
+              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
+                <MessageCircle className="w-12 h-12" />
+              </div>
+              <h3 className="text-2xl font-bold text-foreground mb-4">Welcome to ChatterConnect</h3>
+              <p className="text-lg">Select a chat or start a new conversation to begin messaging</p>
             </div>
           </div>
         )}
+        
+        {/* Floating Compose Button */}
+        <FloatingComposeButton 
+          onClick={() => {
+            // Focus on the search input or show a new chat modal
+            const searchInput = document.querySelector('input[placeholder*="Search"]');
+            if (searchInput) {
+              searchInput.focus();
+            }
+          }}
+        />
       </div>
     </div>
   );
