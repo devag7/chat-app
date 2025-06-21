@@ -202,6 +202,23 @@ export async function registerRoutes(app) {
     }
   });
 
+  app.post("/api/chats/group", requireAuth, async (req, res) => {
+    try {
+      const { name, memberIds } = req.body;
+      const createdBy = req.session.userId;
+      
+      if (!name || !Array.isArray(memberIds)) {
+        return res.status(400).json({ message: "Name and member IDs are required" });
+      }
+      
+      const chatRoom = await storage.createGroupChat(name, createdBy, memberIds);
+      res.json(chatRoom);
+    } catch (error) {
+      console.error('Create group chat error:', error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
   app.post("/api/chats/:userId", requireAuth, async (req, res) => {
     try {
       const { userId } = req.params;
@@ -238,23 +255,6 @@ export async function registerRoutes(app) {
       res.json(messages);
     } catch (error) {
       console.error('Get messages error:', error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-
-  app.post("/api/chats/group", requireAuth, async (req, res) => {
-    try {
-      const { name, memberIds } = req.body;
-      const createdBy = req.session.userId;
-      
-      if (!name || !Array.isArray(memberIds)) {
-        return res.status(400).json({ message: "Name and member IDs are required" });
-      }
-      
-      const chatRoom = await storage.createGroupChat(name, createdBy, memberIds);
-      res.json(chatRoom);
-    } catch (error) {
-      console.error('Create group chat error:', error);
       res.status(500).json({ message: error.message });
     }
   });
