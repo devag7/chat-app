@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+    
+    <script>
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const host = window.location.host || 'localhost:3000';
+        const wsUrl = `${protocol}//${host}/ws`;
+        
+        console.log('Testing WebSocket URL:', wsUrl);
+        document.getElementById('status').textContent = `Connecting to: ${wsUrl}`;
+        
+        try {
+            const ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                console.log('WebSocket connected');
+                document.getElementById('status').textContent = 'Connected!';
+                // Test auth
+                ws.send(JSON.stringify({
+                    type: "auth",
+                    userId: "test-user"
+                }));
+            };
+            
+            ws.onmessage = function(event) {
+                console.log('Received:', event.data);
+                const messages = document.getElementById('messages');
+                messages.innerHTML += '<div>' + event.data + '</div>';
+            };
+            
+            ws.onclose = function() {
+                console.log('WebSocket disconnected');
+                document.getElementById('status').textContent = 'Disconnected';
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                document.getElementById('status').textContent = 'Error: ' + error;
+            };
+        } catch (error) {
+            console.error('Failed to create WebSocket:', error);
+            document.getElementById('status').textContent = 'Failed to create WebSocket: ' + error.message;
+        }
+    </script>
+</body>
+</html>
